@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>URL Suffix Extension</title>
+<script>
+safari.application.addEventListener("command", performCommand, false)
+
+function performCommand(event) {
+    if (event.command == "appendSuffix") {
+        // Get URL suffix from settings
+        var settings  = safari.extension.settings;
+        var urlSuffix = settings['urlSuffix'];
+
+        if (typeof urlSuffix != "undefined") {
+            // Get active tab's URL
+            var url         = safari.application.activeBrowserWindow.activeTab.url;
+
+            // Construct new URL
+            var firstSplit  = url.split('://');                       // ['http', 'example.com/stuff/more']
+            var urlStart    = firstSplit[0] + '://';                  // 'http://'
+            var secondSplit = firstSplit[1].split('/');               // ['example.com', 'stuff', 'more']
+            var domain      = secondSplit[0];                         // ['example.com']
+            var restOfURL   = secondSplit.slice(1).join('/');         // [stuff/more]
+            var newDomain   = domain + '.' + urlSuffix;               // ['example.com.suffix']
+            var newURL      = urlStart + newDomain + '/' + restOfURL; // ['http://example.com.suffix/stuff/more']
+
+            // Load new URL in the current tab
+            safari.application.activeBrowserWindow.activeTab.url = newURL;
+        }
+        else {
+            alert("Please specify a suffix in Preferences.")
+        }
+    }
+}
+</script>
